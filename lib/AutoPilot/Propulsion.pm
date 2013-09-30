@@ -18,6 +18,8 @@ Is the motor enabled at the moment?
 =cut
 
 has enabled => (
+    is      => 'rw',
+    default => 1,
 );
 
 =attr rollFactor
@@ -30,6 +32,7 @@ multiplied by roll factor for all drives the net roll is zero.
 =cut
 
 has rollFactor => (
+    is => 'rw',
 );
 
 =attr pitchFactor
@@ -42,6 +45,7 @@ multiplied by pitch factor for all drives the net roll is zero.
 =cut
 
 has pitchFactor => (
+    is => 'rw',
 );
 
 =attr yawFactor
@@ -54,5 +58,7 @@ multiplied by yaw factor for all drives the net roll is zero.
 =cut
 
 has yawFactor => (
+    is => 'rw',
 );
 
+1;

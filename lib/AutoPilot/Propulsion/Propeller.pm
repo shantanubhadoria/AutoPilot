@@ -11,7 +11,9 @@ package AutoPilot::Propulsion::Propeller;
 use 5.010;
 use Moose;
 
-extends 'Autopilot::Propulsion';
+use Math::Trig qw/deg2rad/;
+
+extends 'AutoPilot::Propulsion';
 
 =attr angleAgainstX
 
@@ -19,7 +21,8 @@ angle in degrees on XY plane that the propeller makes against the roll axis
 
 =cut
 
-has angleAgainstX(
+has angleAgainstX => (
+    is      => 'rw',
     trigger => \&_trigger_angleAgainstX,
 );
 
@@ -29,3 +32,5 @@ sub _trigger_angleAgainstX {
     $self->rollFactor( cos( deg2rad( $angleAgainstX + 90 ) ) );
     $self->pitchFactor( cos( deg2rad( $angleAgainstX ) ) );
 }
+
+1;
