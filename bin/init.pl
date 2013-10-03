@@ -29,24 +29,42 @@ my $ahrs  = AutoPilot::AHRS->new(
         I2CBusDevicePath => '/dev/i2c-1',
     ),
 );
-my $gyroRadiansPerSecond = $ahrs->gyroscope->getReadingsRadiansPerSecond;
-$ahrs->gyroscopeVector(
-    [ 
-        $gyroRadiansPerSecond->{x}, # roll
-        $gyroRadiansPerSecond->{y}, # pitch
-        $gyroRadiansPerSecond->{z}, # yaw
-    ]
-);
-my $accelerometerInG = $ahrs->accelerometer->getAccelerationVectorInG;
-$ahrs->accelerometerVector(
-    [ 
-        $accelerometerInG->{x}, # roll
-        $accelerometerInG->{y}, # pitch
-        $accelerometerInG->{z}, # yaw
-    ]
-);
-$ahrs->updateDCMMatrix;
-$ahrs->normalize;
+my $counter = 5;
+while (1) {
+    $counter++;
+    my $gyroRadiansPerSecond = $ahrs->gyroscope->getReadingsRadiansPerSecond;
+    $ahrs->gyroscopeVector(
+        [ 
+            $gyroRadiansPerSecond->{x}, # roll
+            $gyroRadiansPerSecond->{y}, # pitch
+            $gyroRadiansPerSecond->{z}, # yaw
+        ]
+    );
+    my $accelerometerInG = $ahrs->accelerometer->getAccelerationVectorInG;
+    $ahrs->accelerometerVector(
+        [ 
+            $accelerometerInG->{x}, # roll
+            $accelerometerInG->{y}, # pitch
+            $accelerometerInG->{z}, # yaw
+        ]
+    );
+    if( $counter > 5 ) {
+        $counter = 0;
+        my $magnetometerScale1 = $ahrs->magnetometer->gettMagnetometerScale1;
+        $ahrs->magnetometerVector(
+            [ 
+                $magnetometerScale1->{x}, # roll
+                $magnetometerScale1->{y}, # pitch
+                $magnetometerScale1->{z}, # yaw
+            ]
+        );
+    }
+    $ahrs->updateDCMMatrix;
+    $ahrs->normalize;
+    $ahrs->driftCorrection;
+    $ahrs->eulerAngles;
+    
+}
 
 use Data::Dumper;
 #say Dumper $pilot->propulsionDrives();

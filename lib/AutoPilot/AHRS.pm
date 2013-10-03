@@ -207,15 +207,54 @@ sub driftCorrection {
     $omegaI = _addVector($omegaI, $scaledOmegaI);
 
 
-    # YAW
+    # *****************************YAW********************************
     # We make the gyro YAW drift correction based on compass magnetic heading
     my $magneticHeadingX = cos($mageneticHeading);
     my $magneticHeadingY = sin($mageneticHeading);
+
+    # Applies the yaw correction on xyz position of frame depending on position.
     my $errorCourse      = 
         ($DCMMatrix->[0]->[0] * $magneticHeadingY)
-        - ($DCMMatirx->[1]->[0] * $magneticHeadingX);
+        - ($DCMMatirx->[1]->[0] * $magneticHeadingX); # Calculating Yaw Error
+    my $errorYaw         = _scalarProductVector($DCMMatrix->[2], $errorCourse);
 
+    # Proportional of Yaw 
+    my $scaledOmegaP     = _scalarProductVector($errorYaw, Kp_YAW); 
+    $omegaP              = _addVector($omegaP, $scaledOmegaP);
 
+    # Integrator
+    $scaledOmegaI        = _scalarProductVector($errorYaw, Ki_YAW);
+    $omegaI              = _addVector($omegaI, $scaledOmegaI);
+
+    # Move values to Object
+    $self->omegaI($omegaI); 
+    $self->omegaP($omegaP);
+}
+
+sub eulerAngles {
+    my ( $self ) = @_;
+    my $DCMMatrix = $self->DCMMatrix;
+
+    $self->roll( atan2( $DCMMatrix->[2]->[1], $DCMMatrix->[2]->[2] ) );
+    $self->pitch( ( -1 ) * ( _asin( $DCMMatrix->[2]->[0] ) );
+    $self->yaw( atan2( $DCMMatrix->[1]->[0], $DCMMatrix->[0]->[0] ) );
+}
+
+sub compassHeading {
+    my ( $self ) = @_;
+    $magnetometerVector = $self->magnetometerVector;
+
+    $cosRoll  = cos( $self->roll );
+    $sinRoll  = sin( $self->roll );
+    $cosPitch = cos( $self->pitch );
+    $sinPitch = sin( $self->pitch );
+
+    $magnetometerX = ($magnetometerVector->{x} * $cosPitch)
+        + ($magnetometerVector->{y} * $sinRoll * $sinPitch)
+        + ($magnetometerVector->{z} * $cosRoll * $sinPitch);
+    $magnetometerY = ($magnetometerVector->{y} * $cosRoll)
+        - ($magnetometerVector->{z} * $sinRoll);
+    $self->magneticHeading( atan2( ( ( -1 ) * $magnetometerY), $magnetometerX ) );
 }
 
 sub _addVector {
@@ -278,5 +317,7 @@ sub _multiplyMatrix {
     }
     return $tempMatrix;
 }
+
+sub _asin { atan2($_[0], sqrt(1 - $_[0] * $_[0])) }
 
 1;
