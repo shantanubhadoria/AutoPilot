@@ -29,6 +29,24 @@ my $ahrs  = AutoPilot::AHRS->new(
         I2CBusDevicePath => '/dev/i2c-1',
     ),
 );
+my $gyroRadiansPerSecond = $ahrs->gyroscope->getReadingsRadiansPerSecond;
+$ahrs->gyroscopeVector(
+    [ 
+        $gyroRadiansPerSecond->{x}, # roll
+        $gyroRadiansPerSecond->{y}, # pitch
+        $gyroRadiansPerSecond->{z}, # yaw
+    ]
+);
+my $accelerometerInG = $ahrs->accelerometer->getAccelerationVectorInG;
+$ahrs->accelerometerVector(
+    [ 
+        $accelerometerInG->{x}, # roll
+        $accelerometerInG->{y}, # pitch
+        $accelerometerInG->{z}, # yaw
+    ]
+);
+$ahrs->updateDCMMatrix;
+$ahrs->normalize;
 
 use Data::Dumper;
 #say Dumper $pilot->propulsionDrives();
